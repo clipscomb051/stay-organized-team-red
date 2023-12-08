@@ -4,11 +4,14 @@ window.onload = function (_event) {
         .then(populateUserSelect)
         .then(getCategories)
 
-    const userSelect = document.getElementById("user-select")
+    const userSelect = document.getElementById("userSelect")
     //userSelect.onchange = handleUserSelect
 
-    const categorySelect = document.getElementById("category-select")
-    categorySelect.onsubmit = newToDo
+    const categorySelect = document.getElementById("categorySelect")
+    
+    const todoForm = document.getElementById("todoForm")
+    todoForm.onsubmit = addToDo
+
 }
 function getUsers() {
     return fetch(`http://localhost:8083/api/users`)
@@ -22,7 +25,7 @@ function populateUserSelect(users) {
     }
 
     console.log(users)
-    const userPick = document.getElementById("user-select")
+    const userPick = document.getElementById("userSelect")
     userPick.innerHTML += html
 }
 
@@ -35,16 +38,47 @@ function getCategories() {
                 html += `<option value="${currentCategory.id}">${currentCategory.name}</option>`
 
             }
-            const pickCategory = document.getElementById("category-select")
+            const pickCategory = document.getElementById("categorySelect")
             pickCategory.innerHTML = html
         })
 }
 
 
-function newToDo(event){
-    const addToDo = event.target.value
-    let html = ""
+function addToDo(event) {
+    event.preventDefault()
+    const todoForm = event.target
+    const userId = todoForm.elements.userSelect.value
+    const selectedCategoryId = todoForm.elements.categorySelect.value
+    const selectedPriority = todoForm.elements.prioritySelect.value
+    const selectedDeadline = todoForm.elements.deadlineInput.value
+    const description = todoForm.elements.descriptionInput.value
     
+    
+    const newTodoJSON = JSON.stringify({
+        // add the rest of the properties here
+        // like userid and deadline
+        userid: userId,
+        category: selectedCategoryId,
+        priority: selectedPriority,
+        description: description,
+        deadline: selectedDeadline,
+        completed: false,
+
+    })
+
+    const options = {
+        method: "POST",
+        headers:{
+            "Content-Type": "application/json"
+        },
+        body: newTodoJSON,
+    }
+
+    fetch(`http://localhost:8083/api/todos/`, options)
+        .then(response => response.json())
+        .then(data => console.log(data))
+
+    addToDo.innerHTML = `<h4>description:</h4>`
 }
 
 
